@@ -1,0 +1,16 @@
+from decimal import Decimal
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
+
+class ClientPreferenceCreate(BaseModel):
+    client_id: UUID
+    property_type: str = Field(min_length=2, max_length=50)
+    min_price: Decimal = Field(gt=0, max_digits=12, decimal_places=2)
+    max_price: Decimal = Field(gt=0, max_digits=12, decimal_places=2)
+    min_area_sqm: Decimal = Field(gt=0, max_digits=10, decimal_places=2)
+    max_area_sqm: Decimal = Field(gt=0, max_digits=10, decimal_places=2)
+    min_beds: int = Field(ge=0)
+    max_beds: int = Field(ge=0)
+    min_baths: int = Field(ge=0)
+    max_baths: int = Field(ge=0)

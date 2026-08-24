@@ -1,0 +1,40 @@
+from uuid import UUID
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.property import Property
+from app.repositories.property_repository import PropertyRepository
+from app.schemas.property import PropertyCreate, PropertyUpdate
+
+
+class PropertyService:
+    def __init__(self, session: AsyncSession):
+        self.repository = PropertyRepository(session)
+
+    async def create_property(self, data: PropertyCreate) -> Property:
+        return await self.repository.create(data)
+
+    async def get_properties(self) -> list[Property]:
+        return await self.repository.get_all()
+
+    async def get_property_by_id(
+        self,
+        property_id: UUID,
+    ) -> Property | None:
+        return await self.repository.get_by_id(property_id)
+
+    async def update_property(
+        self,
+        property_obj: Property,
+        data: PropertyUpdate,
+    ) -> Property:
+        return await self.repository.update(
+            property_obj,
+            data,
+        )
+
+    async def deactivate_property(
+        self,
+        property_obj: Property,
+    ) -> Property:
+        return await self.repository.deactivate(property_obj)

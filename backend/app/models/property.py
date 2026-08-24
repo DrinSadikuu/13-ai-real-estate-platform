@@ -1,0 +1,94 @@
+from datetime import datetime
+from decimal import Decimal
+from uuid import UUID, uuid4
+
+from sqlalchemy import Boolean, DateTime, Integer, Numeric, String, Text, func
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.db.base import Base
+
+
+class Property(Base):
+    __tablename__ = "properties"
+
+    id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid4,
+    )
+
+    title: Mapped[str] = mapped_column(
+        String(200),
+        nullable=False,
+    )
+
+    description: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    property_type: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+    )
+
+    listing_type: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+    )
+
+    city: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+    )
+
+    address: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+    )
+
+    price: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2),
+        nullable=False,
+    )
+
+    bedrooms: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    bathrooms: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    area_sqm: Mapped[Decimal | None] = mapped_column(
+        Numeric(10, 2),
+        nullable=True,
+    )
+
+    furnished: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
+
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )

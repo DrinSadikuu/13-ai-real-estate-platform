@@ -1,0 +1,6 @@
+from enum import strEnum
+
+class ViewingStatus(strEnum):
+    SCHEDULED = "scheduled"
+    COMPLETED = "completed"
+    CANCELED = "canceled"

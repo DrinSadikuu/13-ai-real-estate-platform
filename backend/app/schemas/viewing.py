@@ -1,0 +1,39 @@
+from datetime import datetime
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
+from app.core.enums import ViewingStatus
+
+
+class ViewingCreate(BaseModel):
+    client_id: UUID
+    property_id: UUID
+    scheduled_at: datetime
+
+    status: ViewingStatus = ViewingStatus.SCHEDULED
+
+    notes: str | None = Field(
+        default=None,
+        max_length=5000,
+    )
+
+
+class ViewingResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    client_id: UUID
+    property_id: UUID
+    scheduled_at: datetime
+    status: ViewingStatus
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+
+class ViewingUpdate(BaseModel):
+    scheduled_at: datetime | None = None
+    status: ViewingStatus | None = None
+    notes: str | None = Field(
+        default= None,
+        max_length=5000,
+    )
