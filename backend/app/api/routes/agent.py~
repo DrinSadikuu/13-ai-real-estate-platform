@@ -1,0 +1,18 @@
+
+from fastapi import APIRouter
+
+from app.schemas.agent import AgentRequest, AgentResponse
+from app.services.agent_service import AgentService
+
+router = APIRouter(
+    prefix="/agent",
+    tags=["agent"],
+)
+
+@router.post("/chat", response_model=AgentResponse)
+async def chat_with_agent(data: AgentRequest):
+    service = AgentService()
+
+    response = await service.run(data.message)
+
+    return AgentResponse(response=response)

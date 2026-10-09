@@ -1,0 +1,20 @@
+from uuid import UUID
+
+from langchain_core.tools import tool
+
+from app.db.database import async_session_factory
+from app.services.property_matching_service import PropertyMatchingService
+
+
+@tool
+async def find_property_matches_for_client(
+    client_id: str,
+):
+    """Find property matches for a client using the client's saved preferences."""
+
+    async with async_session_factory() as session:
+        service = PropertyMatchingService(session)
+
+        return await service.find_matches_for_client(
+            UUID(client_id)
+        )

@@ -1,0 +1,30 @@
+from langchain_openai import ChatOpenAI
+
+from langgraph.graph import END, StateGraph
+
+from app.agents.state import AgentState
+from app.core.config import get_settings
+
+settings = get_settings()
+
+model = ChatOpenAI(
+    model = settings.openai_model,
+    api_key=settings.openai_api_key,
+)
+
+async def call_model(state: AgentState):
+    response = await model.ainvoke(state["messages"])
+
+    return {
+        "messages": [response]
+    }
+
+builder = StateGraph(AgentState)
+
+builder.add_node("agent", call_model)
+
+builder.set_entry_point("agent")
+
+builder.add_edge("agent", END)
+
+graph = builder.compile()

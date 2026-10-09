@@ -1,0 +1,10 @@
+from langchain_core.messages import HumanMessage
+
+from app.agents.graph import graph
+
+class AgentService:
+    async def run(self, message: str)->str:
+        result = await graph.ainvoke({"messages": [HumanMessage(content=message)]})
+
+        return result
+    
