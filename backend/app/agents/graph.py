@@ -5,11 +5,19 @@ from langgraph.prebuilt import ToolNode
 from app.agents.state import AgentState
 from app.core.config import get_settings
 from app.tools.property_matching import find_property_matches_for_client
+from app.tools.client_tools import get_client
+from app.tools.property_tools import get_property,get_properties
+from app.tools.viewing_tools import get_viewing, get_viewings
 
 settings = get_settings()
 
 tools = [
-    find_property_matches_for_client
+    find_property_matches_for_client,
+    get_client,
+    get_property,
+    get_properties,
+    get_viewing,
+    get_viewings,
 ]
 
 model = ChatOpenAI(
