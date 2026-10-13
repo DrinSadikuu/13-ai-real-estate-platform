@@ -1,6 +1,11 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
-from app.schemas.agent import AgentRequest, AgentResponse
+from app.schemas.agent import (
+    AgentRequest,
+    AgentResponse,
+    AgentApprovalRequest,
+)
+
 from app.services.agent_service import AgentService
 
 
@@ -14,13 +19,53 @@ router = APIRouter(
     "/chat",
     response_model=AgentResponse,
 )
-async def chat_with_agent(
-    data: AgentRequest,
-):
+async def chat_with_agent(data: AgentRequest):
     service = AgentService()
 
-    response = await service.run(data.message)
+    try:
+        result = await service.run(
+            message=data.message,
+            thread_id=data.thread_id,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail=str(exc),
+        ) from exc
 
-    return AgentResponse(
-        response=response
-    )
+    return AgentResponse(**result)
+
+
+@router.post(
+    "/approve",
+    response_model=AgentResponse,
+)
+async def approve_agent_action(data: AgentApprovalRequest):
+    service = AgentService()
+
+    try:
+        result = await service.approve(data.thread_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail=str(exc),
+        ) from exc
+
+    return AgentResponse(**result)
+
+@router.post(
+    "/reject",
+    response_model=AgentResponse,
+)
+async def reject_agent_action(data: AgentApprovalRequest):
+    service = AgentService()
+
+    try:
+        result = await service.reject(data.thread_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail=str(exc),
+        ) from exc
+
+    return AgentResponse(**result)
