@@ -41,6 +41,19 @@ async def get_properties(
     service = PropertyService(session)
     return await service.get_properties()
 
+@router.get("/search", response_model = list[PropertyResponse])
+async def search_properties(
+        query: str,
+        limit: int =5,
+        session: AsyncSession = Depends(get_db),
+):
+    service = PropertyService(session)
+
+    return await service.search_properties(
+        search_text=query,
+        limit=limit,
+    )
+
 
 @router.get(
     "/{property_id}",

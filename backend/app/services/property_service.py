@@ -55,3 +55,13 @@ class PropertyService:
         property_obj: Property,
     ) -> Property:
         return await self.repository.deactivate(property_obj)
+
+    async def search_properties(self, search_text: str, limit:int = 5,)-> list[Property]:
+        query_embedding = await self.embedding_service.generate_embedding(search_text)
+
+        properties = await self.repository.semantic_search(
+            query_embedding = query_embedding,
+            limit = limit,
+        )
+
+        return properties

@@ -12,7 +12,11 @@ from app.core.config import get_settings
 
 from app.tools.property_matching import find_property_matches_for_client
 from app.tools.client_tools import get_client
-from app.tools.property_tools import get_property, get_properties
+from app.tools.property_tools import (
+    get_property,
+    get_properties,
+    semantic_search_properties,
+)
 from app.tools.viewing_tools import get_viewing, get_viewings
 from app.tools.viewing_actions import schedule_viewing
 
@@ -24,6 +28,7 @@ read_tools = [
     get_client,
     get_property,
     get_properties,
+    semantic_search_properties,
     get_viewing,
     get_viewings,
 ]

@@ -29,3 +29,27 @@ async def get_properties() -> list[dict]:
             PropertyResponse.model_validate(property_obj).model_dump(mode="json")
             for property_obj in properties
         ]
+
+@tool
+async def semantic_search_properties(query: str, limit: int = 5) -> list[dict]:
+    """Search properties by natural-language descriptions and preferences.
+
+        Use this tool when a user describes the kind of property they want,
+        such as a quiet apartment near a park, a family home with a balcony,
+        or an office suitable for a business.
+
+        Searches property descriptions using vector embeddings and semantic
+        similarity rather than exact keyword matching.
+    """
+    async with async_session_factory() as session:
+        service = PropertyService(session)
+
+        properties = await service.search_properties(
+            search_text=query,
+            limit=limit,
+        )
+
+        return [
+            PropertyResponse.model_validate(property_obj).model_dump(mode="json")
+            for property_obj in properties
+        ]

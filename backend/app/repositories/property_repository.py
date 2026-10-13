@@ -1,3 +1,4 @@
+from unittest import result
 from uuid import UUID
 
 from sqlalchemy import select
@@ -70,4 +71,18 @@ class PropertyRepository:
         await self.session.refresh(property_obj)
 
         return property_obj
+
+    async def semantic_search(self, query_embedding: list[float], limit: int = 5)-> list[Property]:
+        query = (
+            select(Property)
+            .where(Property.embedding.is_not(None))
+            .order_by(
+                Property.embedding.cosine_distance(query_embedding)
+            )
+            .limit(limit)
+        )
+
+        result = await self.session.execute(query)
+
+        return list(result.scalars().all())
 
