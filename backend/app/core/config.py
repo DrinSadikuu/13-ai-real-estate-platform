@@ -12,6 +12,14 @@ class Settings(BaseSettings):
     openai_api_key: str
     openai_model: str = "gpt-5.6"
 
+    @property
+    def checkpoint_database_url(self) -> str:
+        return self.database_url.replace(
+            "postgresql+asyncpg://",
+            "postgresql://",
+            1,
+        )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

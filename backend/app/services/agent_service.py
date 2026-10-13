@@ -4,11 +4,12 @@ from uuid import uuid4
 from langchain_core.messages import HumanMessage
 from langgraph.types import Command
 
-from app.agents.graph import graph
+
 
 
 class AgentService:
-
+    def __init__(self,graph):
+        self.graph = graph
     @staticmethod
     def get_pending_actions(state) -> list[dict]:
         for task in state.tasks:
@@ -34,7 +35,7 @@ class AgentService:
             }
         }
 
-        state = await graph.aget_state(config)
+        state = await self.graph.aget_state(config)
 
         if self.get_pending_actions(state):
             raise ValueError(
@@ -42,12 +43,12 @@ class AgentService:
                 "Approve or reject it before sending another message."
             )
 
-        result = await graph.ainvoke(
+        result = await self.graph.ainvoke(
             {"messages": [HumanMessage(content=message)]},
             config=config,
         )
 
-        state = await graph.aget_state(config)
+        state = await self.graph.aget_state(config)
         pending_actions = self.get_pending_actions(state)
 
         if pending_actions:
@@ -77,17 +78,17 @@ class AgentService:
             }
         }
 
-        state = await graph.aget_state(config)
+        state = await self.graph.aget_state(config)
 
         if not self.get_pending_actions(state):
             raise ValueError("No pending approval found.")
 
-        result = await graph.ainvoke(
+        result = await self.graph.ainvoke(
             Command(resume=approved),
             config=config,
         )
 
-        state = await graph.aget_state(config)
+        state = await self.graph.aget_state(config)
         pending_actions = self.get_pending_actions(state)
 
         if pending_actions:

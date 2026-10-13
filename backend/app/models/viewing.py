@@ -1,7 +1,8 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, String, Text, func, Index, text
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -11,6 +12,16 @@ from app.db.base import Base
 class Viewing(Base):
     __tablename__ = "viewings"
 
+    __table_args__ = (
+        Index(
+            "uq_active_viewing_client_property_time",
+            "client_id",
+            "property_id",
+            "scheduled_at",
+            unique=True,
+            postgresql_where=text("status = 'scheduled'"),
+        ),
+    )
     id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True),
         primary_key=True,

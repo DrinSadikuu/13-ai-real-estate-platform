@@ -1,4 +1,8 @@
+
 from uuid import UUID
+from datetime import datetime
+from sqlalchemy.exc import IntegrityError
+from app.core.exceptions import ConflictError
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,13 +16,39 @@ class ViewingRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, data: ViewingCreate) -> Viewing:
-        viewing = Viewing(
-            **data.model_dump()
+    async def find_duplicate(
+            self,
+            client_id: UUID,
+            property_id: UUID,
+            scheduled_at: datetime,
+    ) -> Viewing | None:
+        query = select(Viewing).where(
+            Viewing.client_id == client_id,
+            Viewing.property_id == property_id,
+            Viewing.scheduled_at == scheduled_at,
+            Viewing.status == ViewingStatus.SCHEDULED,
         )
+
+        result = await self.session.execute(query)
+
+        return result.scalar_one_or_none()
+
+    async def create(self, data: ViewingCreate) -> Viewing:
+        viewing = Viewing(**data.model_dump())
         self.session.add(viewing)
 
-        await self.session.commit()
+        try:
+            await self.session.commit()
+        except IntegrityError as exc:
+            await self.session.rollback()
+
+            if getattr(exc.orig, "sqlstate", None) == "23505":
+                raise ConflictError(
+                    "A viewing with these details already exists."
+                ) from exc
+
+            raise
+
         await self.session.refresh(viewing)
 
         return viewing

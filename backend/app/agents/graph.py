@@ -4,7 +4,7 @@ from langchain_core.messages import ToolMessage
 
 from langgraph.graph import END, StateGraph
 from langgraph.prebuilt import ToolNode
-from langgraph.checkpoint.memory import MemorySaver
+
 from langgraph.types import interrupt
 
 from app.agents.state import AgentState
@@ -124,6 +124,5 @@ builder.add_conditional_edges(
 
 builder.add_edge("write_tools", "agent")
 
-checkpointer = MemorySaver()
-
-graph = builder.compile(checkpointer=checkpointer)
+def create_graph(checkpointer):
+    return builder.compile(checkpointer=checkpointer)

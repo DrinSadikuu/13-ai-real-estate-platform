@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import NotFoundError
+from app.core.exceptions import NotFoundError, ConflictError
 from app.models.viewing import Viewing
 from app.repositories.client_repository import ClientRepository
 from app.repositories.property_repository import PropertyRepository
@@ -31,6 +31,18 @@ class ViewingService:
 
         if property_obj is None:
             raise NotFoundError("Property not found")
+
+        duplicate = await self.viewing_repository.find_duplicate(
+            client_id=data.client_id,
+            property_id=data.property_id,
+            scheduled_at=data.scheduled_at,
+        )
+
+        if duplicate is not None:
+            raise ConflictError(
+                "A scheduled viewing already exists for this "
+                "client, property, and time."
+            )
 
         return await self.viewing_repository.create(data)
 

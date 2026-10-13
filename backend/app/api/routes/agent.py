@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
 from app.schemas.agent import (
     AgentRequest,
@@ -19,8 +19,8 @@ router = APIRouter(
     "/chat",
     response_model=AgentResponse,
 )
-async def chat_with_agent(data: AgentRequest):
-    service = AgentService()
+async def chat_with_agent(data: AgentRequest, request: Request):
+    service = AgentService(request.app.state.graph)
 
     try:
         result = await service.run(
@@ -40,8 +40,8 @@ async def chat_with_agent(data: AgentRequest):
     "/approve",
     response_model=AgentResponse,
 )
-async def approve_agent_action(data: AgentApprovalRequest):
-    service = AgentService()
+async def approve_agent_action(data: AgentApprovalRequest, request: Request):
+    service = AgentService(request.app.state.graph)
 
     try:
         result = await service.approve(data.thread_id)
@@ -57,9 +57,8 @@ async def approve_agent_action(data: AgentApprovalRequest):
     "/reject",
     response_model=AgentResponse,
 )
-async def reject_agent_action(data: AgentApprovalRequest):
-    service = AgentService()
-
+async def reject_agent_action(data: AgentApprovalRequest, request: Request):
+    service = AgentService(request.app.state.graph)
     try:
         result = await service.reject(data.thread_id)
     except ValueError as exc:
