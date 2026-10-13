@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from app.services.embedding_service import EmbeddingService
 from app.core.exceptions import NotFoundError
 from app.models.property import Property
 from app.repositories.property_repository import PropertyRepository
@@ -11,9 +11,20 @@ from app.schemas.property import PropertyCreate, PropertyUpdate
 class PropertyService:
     def __init__(self, session: AsyncSession):
         self.repository = PropertyRepository(session)
+        self.embedding_service = EmbeddingService()
 
     async def create_property(self, data: PropertyCreate) -> Property:
-        return await self.repository.create(data)
+        embedding = None
+
+        if data.description:
+            embedding = await self.embedding_service.generate_embedding(
+                data.description
+            )
+
+        return await self.repository.create(
+            data,
+            embedding=embedding,
+        )
 
     async def get_properties(self) -> list[Property]:
         return await self.repository.get_all()

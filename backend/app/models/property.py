@@ -1,4 +1,5 @@
 from datetime import datetime
+from pgvector.sqlalchemy import Vector
 from decimal import Decimal
 from uuid import UUID, uuid4
 
@@ -79,6 +80,7 @@ class Property(Base):
         nullable=False,
         default=True,
     )
+    embedding = mapped_column(Vector(1536), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -12,9 +12,14 @@ class PropertyRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, data: PropertyCreate) -> Property:
+    async def create(
+            self,
+            data: PropertyCreate,
+            embedding: list[float] | None = None,
+    ) -> Property:
         property_obj = Property(
-            **data.model_dump()
+            **data.model_dump(),
+            embedding=embedding,
         )
 
         self.session.add(property_obj)
