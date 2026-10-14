@@ -1,7 +1,7 @@
 
 from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from uuid import UUID
 from app.db.database import get_db
 from app.services.document_service import DocumentService
 from pydantic import BaseModel, Field
@@ -12,6 +12,7 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 class DocumentSearchRequest(BaseModel):
     query: str = Field(min_length=1)
     limit: int = Field(default=5, ge=1, le=20)
+    document_id: UUID | None = None
 
 
 @router.post("/upload")
@@ -38,6 +39,7 @@ async def search_documents(
     results = await service.search_documents(
         query=request.query,
         limit=request.limit,
+        document_id=request.document_id,
     )
 
     return {

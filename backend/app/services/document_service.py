@@ -1,5 +1,5 @@
 import chunk
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -72,25 +72,28 @@ class DocumentService:
             self,
             query: str,
             limit: int = 5,
+            document_id: UUID | None = None,
     ) -> list[dict]:
-        # Convert the user's question into an embedding
+        # Generate embedding for the user's question
         query_embedding = await self.embedding_service.generate_embedding(
             query
         )
 
-        # Search PostgreSQL for similar document chunks
+        # Search document chunks, optionally filtering by document ID
         chunks = await self.repository.search_similar_chunks(
             query_embedding=query_embedding,
             limit=limit,
+            document_id=document_id,
         )
 
-        # Format the results
+        # Return chunks with their source information
         return [
             {
                 "chunk_id": str(chunk.id),
                 "document_id": str(chunk.document_id),
+                "filename": filename,
                 "chunk_index": chunk.chunk_index,
                 "content": chunk.content,
             }
-            for chunk in chunks
+            for chunk, filename in chunks
         ]

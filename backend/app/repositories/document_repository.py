@@ -54,10 +54,24 @@ class DocumentRepository:
             self,
             query_embedding: list[float],
             limit: int = 5,
-    ) -> list[DocumentChunk]:
+            document_id: UUID | None = None,
+    ) -> list[tuple[DocumentChunk, str]]:
+
         stmt = (
-            select(DocumentChunk)
-            .order_by(
+            select(DocumentChunk, Document.filename)
+            .join(
+                Document,
+                DocumentChunk.document_id == Document.id,
+            )
+        )
+
+        if document_id is not None:
+            stmt = stmt.where(
+                DocumentChunk.document_id == document_id
+            )
+
+        stmt = (
+            stmt.order_by(
                 DocumentChunk.embedding.cosine_distance(
                     query_embedding
                 )
@@ -67,5 +81,8 @@ class DocumentRepository:
 
         result = await self.session.execute(stmt)
 
-        return list(result.scalars().all())
+        return [
+            (chunk, filename)
+            for chunk, filename in result.all()
+        ]
 
