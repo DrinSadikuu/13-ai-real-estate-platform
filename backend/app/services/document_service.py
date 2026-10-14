@@ -1,4 +1,4 @@
-
+import chunk
 from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -67,3 +67,30 @@ class DocumentService:
             "embedding_dimensions": len(embeddings[0]) if embeddings else 0,
             "message": "Document uploaded, chunked, and saved successfully",
         }
+
+    async def search_documents(
+            self,
+            query: str,
+            limit: int = 5,
+    ) -> list[dict]:
+        # Convert the user's question into an embedding
+        query_embedding = await self.embedding_service.generate_embedding(
+            query
+        )
+
+        # Search PostgreSQL for similar document chunks
+        chunks = await self.repository.search_similar_chunks(
+            query_embedding=query_embedding,
+            limit=limit,
+        )
+
+        # Format the results
+        return [
+            {
+                "chunk_id": str(chunk.id),
+                "document_id": str(chunk.document_id),
+                "chunk_index": chunk.chunk_index,
+                "content": chunk.content,
+            }
+            for chunk in chunks
+        ]

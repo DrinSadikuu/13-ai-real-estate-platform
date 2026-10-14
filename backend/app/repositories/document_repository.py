@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
+from sqlalchemy import select
 
 
 class DocumentRepository:
@@ -48,3 +49,23 @@ class DocumentRepository:
 
     async def commit(self) -> None:
         await self.session.commit()
+
+    async def search_similar_chunks(
+            self,
+            query_embedding: list[float],
+            limit: int = 5,
+    ) -> list[DocumentChunk]:
+        stmt = (
+            select(DocumentChunk)
+            .order_by(
+                DocumentChunk.embedding.cosine_distance(
+                    query_embedding
+                )
+            )
+            .limit(limit)
+        )
+
+        result = await self.session.execute(stmt)
+
+        return list(result.scalars().all())
+

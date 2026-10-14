@@ -19,6 +19,7 @@ from app.tools.property_tools import (
 )
 from app.tools.viewing_tools import get_viewing, get_viewings
 from app.tools.viewing_actions import schedule_viewing
+from app.tools.document_tools import search_property_documents
 
 
 settings = get_settings()
@@ -31,6 +32,7 @@ read_tools = [
     semantic_search_properties,
     get_viewing,
     get_viewings,
+    search_property_documents,
 ]
 
 write_tools = [schedule_viewing]
