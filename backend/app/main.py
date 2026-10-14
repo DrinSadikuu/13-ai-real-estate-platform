@@ -9,6 +9,7 @@ from app.api.routes.viewings import router as viewings_router
 from app.api.routes.client_preferences import router as client_preferences_router
 from app.api.routes.agent import router as agent_router
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from app.api.routes import documents
 
 from contextlib import asynccontextmanager
 
@@ -68,6 +69,7 @@ app.include_router(clients_router)
 app.include_router(viewings_router)
 app.include_router(client_preferences_router)
 app.include_router(agent_router)
+app.include_router(documents.router)
 
 
 @app.get("/health")
