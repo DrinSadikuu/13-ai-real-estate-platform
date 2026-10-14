@@ -1,25 +1,24 @@
 
-from uuid import uuid4
+from fastapi import APIRouter, Depends, File, UploadFile
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi import APIRouter, File, UploadFile
-
-from app.services.s3_service import S3Service
+from app.db.database import get_db
+from app.services.document_service import DocumentService
 
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
 
 @router.post("/upload")
-async def upload_document(file: UploadFile = File(...)):
+async def upload_document(
+    file: UploadFile = File(...),
+    session: AsyncSession = Depends(get_db),
+):
     file_content = await file.read()
 
-    file_key = f"ai-real-estate/property-documents/{uuid4()}.pdf"
+    service = DocumentService(session)
 
-    s3_service = S3Service()
-    s3_service.upload_file(file_content, file_key)
-
-    return {
-        "filename": file.filename,
-        "s3_key": file_key,
-        "message": "Document uploaded successfully",
-    }
+    return await service.process_document(
+        filename=file.filename,
+        file_content=file_content,
+    )

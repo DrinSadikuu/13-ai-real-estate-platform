@@ -12,6 +12,8 @@ from app.models.property import Property
 from app.models.client import Client
 from app.models.viewing import Viewing
 from app.models.client_preference import ClientPreference
+from app.models.document import Document
+from app.models.document_chunk import DocumentChunk
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

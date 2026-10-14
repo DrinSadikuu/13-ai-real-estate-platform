@@ -1,0 +1,50 @@
+
+from uuid import UUID
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.document import Document
+from app.models.document_chunk import DocumentChunk
+
+
+class DocumentRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create_document(
+        self,
+        filename: str,
+        s3_key: str,
+    ) -> Document:
+        document = Document(
+            filename=filename,
+            s3_key=s3_key,
+        )
+
+        self.session.add(document)
+        await self.session.flush()
+
+        return document
+
+    async def create_chunks(
+        self,
+        document_id: UUID,
+        chunks: list[str],
+        embeddings: list[list[float]],
+    ) -> None:
+        for index, (content, embedding) in enumerate(
+            zip(chunks, embeddings)
+        ):
+            chunk = DocumentChunk(
+                document_id=document_id,
+                chunk_index=index,
+                content=content,
+                embedding=embedding,
+            )
+
+            self.session.add(chunk)
+
+        await self.session.flush()
+
+    async def commit(self) -> None:
+        await self.session.commit()
