@@ -10,6 +10,7 @@ from app.api.routes.client_preferences import router as client_preferences_route
 from app.api.routes.agent import router as agent_router
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from app.api.routes import documents
+from app.core.observability import setup_observability
 
 from contextlib import asynccontextmanager
 
@@ -17,6 +18,9 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Initialize Phoenix tracing
+    setup_observability()
+
     async with AsyncPostgresSaver.from_conn_string(
         settings.checkpoint_database_url
     ) as checkpointer:
@@ -27,6 +31,7 @@ async def lifespan(app: FastAPI):
         app.state.graph = create_graph(checkpointer)
 
         print("PostgreSQL checkpointer connected")
+        print("Phoenix observability initialized")
 
         yield
 

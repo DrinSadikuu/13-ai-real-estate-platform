@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 
 class DocumentRepository:
@@ -85,4 +85,36 @@ class DocumentRepository:
             (chunk, filename)
             for chunk, filename in result.all()
         ]
+
+    async def get_all_documents(self) -> list[Document]:
+        stmt = select(Document).order_by(Document.created_at.desc())
+
+        result = await self.session.execute(stmt)
+
+        return list(result.scalars().all())
+
+    async def get_document_by_id(
+            self,
+            document_id: UUID,
+    ) -> Document | None:
+        stmt = select(Document).where(Document.id == document_id)
+
+        result = await self.session.execute(stmt)
+
+        return result.scalar_one_or_none()
+
+    async def delete_document(
+            self,
+            document_id: UUID,
+    ) -> bool:
+        stmt = (
+            delete(Document)
+            .where(Document.id == document_id)
+            .returning(Document.id)
+        )
+
+        result = await self.session.execute(stmt)
+
+        return result.scalar_one_or_none() is not None
+
 
